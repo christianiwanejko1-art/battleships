@@ -132,9 +132,9 @@ input:-webkit-autofill:active {
     border: 0.5px solid black;
 }
 
-.cell[data-id="46"] {
+/* .cell[data-id="46"] {
     background-color: green;
-}
+} */
 
 @media (width <= 768px) {
     #home {

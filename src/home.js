@@ -59,12 +59,52 @@ function createBoard() {
     // your.appendChild(yourTitle);
 
     // populate grid
-    for(let i=0; i < 100; i++){
-        const cell = document.createElement('div');
-        cell.classList.add('cell')
-        cell.dataset.id = i+1;
-        your.appendChild(cell);
+const arr = [2, 3, 3, 4, 5]; // IMPORTANT: outside loop so it persists
+
+function removeOne(arr, value) {
+  const idx = arr.indexOf(value);
+  if (idx !== -1) arr.splice(idx, 1);
+}
+
+for (let i = 0; i < 100; i++) {
+  const cell = document.createElement('div');
+  cell.classList.add('cell');
+  cell.dataset.id = i + 1;
+
+  cell.addEventListener('click', (e) => {
+    const id = Number(e.currentTarget.dataset.id);
+
+    // choose what length to place next (5 first, then 4, then 3, then 3, then 2)
+    let length = null;
+    if (arr.includes(5)) length = 5;
+    else if (arr.includes(4)) length = 4;
+    else if (arr.includes(3)) length = 3;
+    else if (arr.includes(2)) length = 2;
+    else return; // nothing left to place
+
+    // collect cells to color: id, id-1, id-2 ... (length cells total)
+    const idsToColor = [];
+    for (let k = 0; k < length; k++) {
+      idsToColor.push(id - k);
     }
+
+    // stop if any id is invalid (prevents null errors at edges)
+    if (idsToColor.some(n => n < 1)) return;
+
+    // color them
+    idsToColor.forEach(n => {
+      const el = document.querySelector(`[data-id="${n}"]`);
+      if (el) el.style.backgroundColor = 'green';
+    });
+
+    // remove ONE instance of that ship length
+    removeOne(arr, length);
+    console.log('remaining ships:', arr);
+  });
+
+  your.appendChild(cell);
+}
+
     board.append(enemy, your);
     home.appendChild(board);
     body.append(home, title)
