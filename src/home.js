@@ -104,13 +104,13 @@ cell.addEventListener('mouseleave', handleLeave);
     }
     
 
-
-
     // stop if any id is invalid (prevents null errors at edges)
     if (idsToColor.some(n => n < 1)) return;
     if (idsToColor.slice(1).some(num => num % 10 === 0)) return;
+    if (idsToColor.some(x => document.querySelector(`[data-id="${x}"]`).classList.contains('placed'))) return;
 
 
+    if (idsToColor)
     idsToColor.forEach(n => {
       const el = document.querySelector(`[data-id="${n}"]`);
       if (el) el.style.backgroundColor = 'blue';
@@ -147,8 +147,8 @@ cell.addEventListener('mouseleave', handleLeave);
         }   
     if (current[current.length - 1] === 'Battleship'){
             const curCell2 = Number(e.currentTarget.dataset.id);
-            if (!withinBounds(curCell2)) return;
-            curCell.push(String(curCell2))
+        if ([curCell2, curCell2-1, curCell2-2, curCell2-3].some(n => n < 1)) return; 
+        curCell.push(String(curCell2))
             curCell.push(String(curCell2-1))
             curCell.push(String(curCell2-2))
             curCell.push(String(curCell2-3))
@@ -158,7 +158,8 @@ cell.addEventListener('mouseleave', handleLeave);
         }
         if (current[current.length - 1] === 'Destroyer'){
             const curCell2 = Number(e.currentTarget.dataset.id);
-            if (!withinBounds(curCell2)) return;
+        if ([curCell2, curCell2-1, curCell2-2].some(n => n < 1)) return;            
+            curCell.push(String(curCell2))
             curCell.push(String(curCell2))
             curCell.push(String(curCell2-1))
             curCell.push(String(curCell2-2))
@@ -168,7 +169,8 @@ cell.addEventListener('mouseleave', handleLeave);
         }
         if (current[current.length - 1] === 'Submarine'){
             const curCell2 = Number(e.currentTarget.dataset.id);
-            if (!withinBounds(curCell2)) return;
+        if ([curCell2, curCell2-1, curCell2-2].some(n => n < 1)) return;            
+            curCell.push(String(curCell2))
             curCell.push(String(curCell2))
             curCell.push(String(curCell2-1))
             curCell.push(String(curCell2-2))
@@ -178,7 +180,7 @@ cell.addEventListener('mouseleave', handleLeave);
         }
         if (current[current.length - 1] === 'Patrol Boat'){
             const curCell2 = Number(e.currentTarget.dataset.id);
-            if (!withinBounds(curCell2)) return;
+        if ([curCell2, curCell2-1].some(n => n < 1)) return;            
             curCell.push(String(curCell2))
             curCell.push(String(curCell2-1))
             curCell.forEach((x)=>{
@@ -206,10 +208,6 @@ cell.addEventListener('mouseleave', handleLeave);
     body.append(home, title)
 
 }
-
-
-
-
 
 
 function createHome() {
