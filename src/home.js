@@ -56,6 +56,18 @@ function createBoard() {
     enemy.id = 'enemy';
     const your = document.createElement('div');
     your.id = 'your';
+    const boardTitleContainer = document.createElement('div');
+    boardTitleContainer.id = 'boardTitleContainer';
+    const boardTitle = document.createElement('h1');
+    boardTitle.id = 'boardTitle';
+    boardTitle.textContent = `Player 1's Turn`;
+    const boardTurn = document.createElement('h1');
+    boardTurn.id = 'boardTurn';
+    boardTurn.textContent = `Your turn - attack board`;
+    const btn = document.createElement('button');
+    btn.id = 'btn';
+    btn.textContent = 'Start Game';
+    boardTitleContainer.append(boardTitle, boardTurn, btn)
     // const enemyTitle = document.createElement('h1');
     // enemyTitle.textContent = `Enemy board`
     // const yourTitle = document.createElement('h1');
@@ -126,8 +138,9 @@ cell.addEventListener('mouseleave', handleLeave);
 
   });
 
+
   your.appendChild(cell);
-}   
+   }
     let curCell = []
 
     function handleEnter(e){
@@ -203,11 +216,38 @@ cell.addEventListener('mouseleave', handleLeave);
         if (current.length === 0) {
     your.removeEventListener('mouseleave', handleLeave);
     }
-    board.append(enemy, your);
+    board.append(boardTitleContainer, enemy, your);
     home.appendChild(board);
     body.append(home, title)
 
+function createEnemy() {
+    for (let i = 100; i < 200; i++) {
+        const cellE = document.createElement('div');
+        cellE.classList.add('cellE');
+        cellE.dataset.id = i + 1;
+        
+        const enemy = document.getElementById('enemy');
+        enemy.appendChild(cellE);
+    
+    }
 }
+
+let startGame = true
+const btn1 = document.getElementById('btn');
+btn1.addEventListener('click', () => {
+    if (btn.textContent === 'Start Game'){
+        startGame = false;
+        btn.textContent = 'End Game';
+    } else if (btn.textContent === 'End Game'){
+        startGame = true;
+        btn.textContent = 'Start Game';
+    }
+})
+createEnemy()
+}
+
+
+
 
 
 function createHome() {
@@ -243,5 +283,4 @@ function createHome() {
 }
 
 
-
-module.exports = {createHome, createBoard}
+module.exports = { createHome, createBoard }

@@ -126,10 +126,34 @@ input:-webkit-autofill:active {
   width: min(90vw, 400px);
 }
 
+.cellE {
+    border: 0.5px solid grey;
+}
+
 .cell {
     width: 100%;
     height: 100%;
     border: 0.5px solid black;
+}
+
+#boardTitleContainer {
+    width: 100%;
+    height: 250px;
+    position: absolute;
+    top: 0;
+    left: 0;
+    display: grid;
+    grid-template-columns: 1fr;
+    grid-template-rows: repeat(4, 1fr);
+    place-items: center;
+    margin-top: 40px;
+}
+
+#btn {
+    width: 100px;
+    align-self: center;
+    padding: 16px;
+    margin-top: 16px;
 }
 
 
