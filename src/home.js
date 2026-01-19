@@ -35,6 +35,11 @@ function Player(){
     // computer players
 }
 
+const playerShip = new Ship()
+let current = ['Patrol Boat', 'Submarine', 'Destroyer', 'Battleship', 'Carrier'];
+const withinBounds = (n) => n >= 1 && n <= 100;
+
+
 function createBoard() {
     const input = document.getElementById('name').value;
     body.innerHTML = '';
@@ -66,12 +71,22 @@ function removeOne(arr, value) {
   if (idx !== -1) arr.splice(idx, 1);
 }
 
+
+const idsToColor = [];
+
+
 for (let i = 0; i < 100; i++) {
   const cell = document.createElement('div');
   cell.classList.add('cell');
   cell.dataset.id = i + 1;
 
+  cell.addEventListener('mouseenter', handleEnter);
+cell.addEventListener('mouseleave', handleLeave);
+  
+
   cell.addEventListener('click', (e) => {
+
+
     const id = Number(e.currentTarget.dataset.id);
 
     // choose what length to place next (5 first, then 4, then 3, then 3, then 2)
@@ -87,28 +102,114 @@ for (let i = 0; i < 100; i++) {
     for (let k = 0; k < length; k++) {
       idsToColor.push(id - k);
     }
+    
+
+
 
     // stop if any id is invalid (prevents null errors at edges)
     if (idsToColor.some(n => n < 1)) return;
+    if (idsToColor.slice(1).some(num => num % 10 === 0)) return;
 
-    // color them
+
     idsToColor.forEach(n => {
       const el = document.querySelector(`[data-id="${n}"]`);
-      if (el) el.style.backgroundColor = 'green';
+      if (el) el.style.backgroundColor = 'blue';
+        el.classList.add('placed');
     });
+    console.log(current)
 
     // remove ONE instance of that ship length
     removeOne(arr, length);
+
     console.log('remaining ships:', arr);
+    current.pop()
+
   });
 
   your.appendChild(cell);
-}
+}   
+    let curCell = []
 
+    function handleEnter(e){
+        const curCell2 = Number(e.currentTarget.dataset.id);
+        console.log(curCell)
+     if (current[current.length - 1] === 'Carrier') {
+        if ([curCell2, curCell2-1, curCell2-2, curCell2-3, curCell2-4].some(n => n < 1)) return;
+            curCell.push(String(curCell2))
+            curCell.push(String(curCell2-1))
+            curCell.push(String(curCell2-2))
+            curCell.push(String(curCell2-3))
+            curCell.push(String(curCell2-4))
+            console.log(Number(curCell2))
+            curCell.forEach((x)=>{
+                document.querySelector(`[data-id="${x}"]`).style.backgroundColor = 'blue';
+            })
+        }   
+    if (current[current.length - 1] === 'Battleship'){
+            const curCell2 = Number(e.currentTarget.dataset.id);
+            if (!withinBounds(curCell2)) return;
+            curCell.push(String(curCell2))
+            curCell.push(String(curCell2-1))
+            curCell.push(String(curCell2-2))
+            curCell.push(String(curCell2-3))
+            curCell.forEach((x)=>{
+                document.querySelector(`[data-id="${x}"]`).style.backgroundColor = 'blue';
+            })
+        }
+        if (current[current.length - 1] === 'Destroyer'){
+            const curCell2 = Number(e.currentTarget.dataset.id);
+            if (!withinBounds(curCell2)) return;
+            curCell.push(String(curCell2))
+            curCell.push(String(curCell2-1))
+            curCell.push(String(curCell2-2))
+            curCell.forEach((x)=>{
+                document.querySelector(`[data-id="${x}"]`).style.backgroundColor = 'blue';
+            })
+        }
+        if (current[current.length - 1] === 'Submarine'){
+            const curCell2 = Number(e.currentTarget.dataset.id);
+            if (!withinBounds(curCell2)) return;
+            curCell.push(String(curCell2))
+            curCell.push(String(curCell2-1))
+            curCell.push(String(curCell2-2))
+            curCell.forEach((x)=>{
+                document.querySelector(`[data-id="${x}"]`).style.backgroundColor = 'blue';
+            })
+        }
+        if (current[current.length - 1] === 'Patrol Boat'){
+            const curCell2 = Number(e.currentTarget.dataset.id);
+            if (!withinBounds(curCell2)) return;
+            curCell.push(String(curCell2))
+            curCell.push(String(curCell2-1))
+            curCell.forEach((x)=>{
+                document.querySelector(`[data-id="${x}"]`).style.backgroundColor = 'blue';
+            })
+        }
+    } 
+    function handleLeave(e){
+        curCell.forEach((x)=>{
+            if (!withinBounds(x)) return;
+            const el = document.querySelector(`[data-id="${x}"]`)
+            if (el.classList.contains('placed')) return;
+            document.querySelector(`[data-id="${x}"]`).style.backgroundColor = '';
+            })
+        curCell = []
+    }
+    if (current.length === 0) {
+    your.removeEventListener('mouseenter', handleEnter);
+    }
+        if (current.length === 0) {
+    your.removeEventListener('mouseleave', handleLeave);
+    }
     board.append(enemy, your);
     home.appendChild(board);
     body.append(home, title)
+
 }
+
+
+
+
 
 
 function createHome() {
