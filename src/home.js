@@ -1,18 +1,25 @@
 const body = document.body
 
-class Ship{
-    'ships' = {'name': 'Carrier', 'length': 5, 'position': null,
-        "name": 'Battleship', 'length' : 4, 'position': null,
-        "name": 'Cruiser', 'length' : 3, 'position': null,
-        "name": 'Submarine', 'length' : 3, 'position': null,
-        "name": 'Destroyer', 'length' : 2, 'position': null
-    }
-    hit(){
 
-    }
-    isSunk(){
+const SHIP_TEMPLATES = {
+  Carrier: { name: "Carrier", length: 5, position: null, hits: 0 },
+  Battleship: { name: "Battleship", length: 4, position: null, hits: 0 },
+  Destroyer: { name: "Destroyer", length: 3, position: null, hits: 0 },
+  Submarine: { name: "Submarine", length: 3, position: null, hits: 0 },
+  PatrolBoat: { name: "Patrol Boat", length: 2, position: null, hits: 0 },
+};
 
-    }
+class Ship {
+  static ships = structuredClone(SHIP_TEMPLATES);
+
+  static reset() {
+    Ship.ships = structuredClone(SHIP_TEMPLATES);
+  }
+
+  hit(shipName, cellId) {
+    
+  }
+  isSunk() {}
 }
 
 
@@ -35,10 +42,11 @@ function Player(){
     // computer players
 }
 
-const playerShip = new Ship()
+
 let current = ['Patrol Boat', 'Submarine', 'Destroyer', 'Battleship', 'Carrier'];
 const withinBounds = (n) => n >= 1 && n <= 100;
-
+let btnState = 'Horizontal'
+let gameStarted = false;
 
 function createBoard() {
     const input = document.getElementById('name').value;
@@ -46,37 +54,45 @@ function createBoard() {
     const home = document.createElement('div');
     home.id = 'play';
 
+    const link = document.createElement('a');
+    link.href = 'index.html';
     const title = document.createElement('h1');
     title.id = 'title';
     title.textContent = 'Home';
+    link.appendChild(title);
 
     const board = document.createElement('div');
     board.id = 'board';
+    const enemyContainer = document.createElement('div');
+    enemyContainer.id = 'enemyContainer';
+    const enemyContainerTitle = document.createElement('h1');
+    enemyContainerTitle.textContent = `Enemy's board`;
+    const startBtn = document.createElement('button');
+    startBtn.id = 'startBtn';
+    startBtn.textContent = 'Start';
     const enemy = document.createElement('div');
     enemy.id = 'enemy';
+    const yourContainer = document.createElement('div');
+    yourContainer.id = 'yourContainer';
+    const yourContainerTitle = document.createElement('h1');
+    yourContainerTitle.textContent = 'Your board';
+    yourContainerTitle.id = 'yourContainerTitle'
+    const buttons = document.createElement('div');
+    buttons.id = 'buttons';
+    const yourResetBoard = document.createElement('button');
+    yourResetBoard.id = 'yourResetBoard';
+    yourResetBoard.textContent = 'Reset';
+    const yourRotate = document.createElement('button');
+    yourRotate.id = 'yourRotate';
+    yourRotate.textContent = 'Vertical';
+    enemyContainerTitle.textContent = `Enemy's board`;
+    enemyContainerTitle.id = 'enemyContainerTitle';
     const your = document.createElement('div');
+    buttons.append(yourResetBoard, yourRotate);
     your.id = 'your';
-    const boardTitleContainer = document.createElement('div');
-    boardTitleContainer.id = 'boardTitleContainer';
-    const boardTitle = document.createElement('h1');
-    boardTitle.id = 'boardTitle';
-    boardTitle.textContent = `Player 1's Turn`;
-    const boardTurn = document.createElement('h1');
-    boardTurn.id = 'boardTurn';
-    boardTurn.textContent = `Your turn - attack board`;
-    const btn = document.createElement('button');
-    btn.id = 'btn';
-    btn.textContent = 'Start Game';
-    boardTitleContainer.append(boardTitle, boardTurn, btn)
-    // const enemyTitle = document.createElement('h1');
-    // enemyTitle.textContent = `Enemy board`
-    // const yourTitle = document.createElement('h1');
-    // yourTitle.textContent = 'Your board';
-    // enemy.appendChild(enemyTitle);
-    // your.appendChild(yourTitle);
 
     // populate grid
-const arr = [2, 3, 3, 4, 5]; // IMPORTANT: outside loop so it persists
+let arr = [2, 3, 3, 4, 5]; // IMPORTANT: outside loop so it persists
 
 function removeOne(arr, value) {
   const idx = arr.indexOf(value);
@@ -91,7 +107,7 @@ for (let i = 0; i < 100; i++) {
   const cell = document.createElement('div');
   cell.classList.add('cell');
   cell.dataset.id = i + 1;
-
+    
   cell.addEventListener('mouseenter', handleEnter);
 cell.addEventListener('mouseleave', handleLeave);
   
@@ -108,34 +124,77 @@ cell.addEventListener('mouseleave', handleLeave);
     else if (arr.includes(3)) length = 3;
     else if (arr.includes(2)) length = 2;
     else return; // nothing left to place
+    if (idsToColor && btnState === 'Horizontal'){
+            // collect cells to color: id, id-1, id-2 ... (length cells total)
+        const idsToColor = [];
+        for (let k = 0; k < length; k++) {
+        idsToColor.push(id - k);
+        }
+        
 
-    // collect cells to color: id, id-1, id-2 ... (length cells total)
-    const idsToColor = [];
-    for (let k = 0; k < length; k++) {
-      idsToColor.push(id - k);
-    }
-    
+        // stop if any id is invalid (prevents null errors at edges)
+        if (idsToColor.some(n => n < 1)) return;
+        if (idsToColor.slice(1).some(num => num % 10 === 0)) return;
+        if (idsToColor.some(x => document.querySelector(`[data-id="${x}"]`).classList.contains('placed'))) return;
 
-    // stop if any id is invalid (prevents null errors at edges)
-    if (idsToColor.some(n => n < 1)) return;
-    if (idsToColor.slice(1).some(num => num % 10 === 0)) return;
-    if (idsToColor.some(x => document.querySelector(`[data-id="${x}"]`).classList.contains('placed'))) return;
+        console.log(current)
 
 
-    if (idsToColor)
-    idsToColor.forEach(n => {
-      const el = document.querySelector(`[data-id="${n}"]`);
-      if (el) el.style.backgroundColor = 'blue';
-        el.classList.add('placed');
-    });
-    console.log(current)
+        if (current.at(-1) === 'Carrier'){
+            Ship.ships.Carrier.position = idsToColor;
+        }     if (current.at(-1) === 'Battleship'){
+            Ship.ships.Battleship.position = idsToColor;
+        }     if (current.at(-1) === 'Destroyer'){
+            Ship.ships.Destroyer.position = idsToColor;
+        }     if (current.at(-1) === 'Submarine'){
+            Ship.ships.Submarine.position = idsToColor;
+        }     if (current.at(-1) === 'Patrol Boat'){
+            Ship.ships.PatrolBoat.position = idsToColor;
+        }
+        idsToColor.forEach(n => {
+        const el = document.querySelector(`[data-id="${n}"]`);
+        if (el) el.style.backgroundColor = 'blue';
+            el.classList.add('placed');
+        });
+        }
 
-    // remove ONE instance of that ship length
-    removeOne(arr, length);
+    if (idsToColor && btnState === 'Vertical'){
+        let idsToColor = [];
+        for (let k = 0; k < length; k++) {
+        idsToColor.push(id - (k*10));
+        }
 
-    console.log('remaining ships:', arr);
-    current.pop()
+        console.log(idsToColor)
+            // stop if any id is invalid (prevents null errors at edges)
+        if (idsToColor.some(n => n < 1)) return;
+        if (idsToColor.some(x => document.querySelector(`[data-id="${x}"]`).classList.contains('placed'))) return;
 
+        if (current.at(-1) === 'Carrier'){
+            Ship.ships.Carrier.position = idsToColor;
+        }     if (current.at(-1) === 'Battleship'){
+            Ship.ships.Battleship.position = idsToColor;
+        }     if (current.at(-1) === 'Destroyer'){
+            Ship.ships.Destroyer.position = idsToColor;
+        }     if (current.at(-1) === 'Submarine'){
+            Ship.ships.Submarine.position = idsToColor;
+        }     if (current.at(-1) === 'Patrol Boat'){
+            Ship.ships.PatrolBoat.position = idsToColor;
+        }
+        idsToColor.forEach(n => {
+        const el = document.querySelector(`[data-id="${n}"]`);
+        if (el) el.style.backgroundColor = 'blue';
+            el.classList.add('placed');
+        });
+
+        }    
+        console.log(current)
+
+        // remove ONE instance of that ship length
+        removeOne(arr, length);
+
+        console.log('remaining ships:', arr);
+        current.pop()
+        console.log(Ship.ships)
   });
 
 
@@ -145,7 +204,7 @@ cell.addEventListener('mouseleave', handleLeave);
 
     function handleEnter(e){
         const curCell2 = Number(e.currentTarget.dataset.id);
-        console.log(curCell)
+    if(btnState === 'Horizontal'){
      if (current[current.length - 1] === 'Carrier') {
         if ([curCell2, curCell2-1, curCell2-2, curCell2-3, curCell2-4].some(n => n < 1)) return;
             curCell.push(String(curCell2))
@@ -153,7 +212,6 @@ cell.addEventListener('mouseleave', handleLeave);
             curCell.push(String(curCell2-2))
             curCell.push(String(curCell2-3))
             curCell.push(String(curCell2-4))
-            console.log(Number(curCell2))
             curCell.forEach((x)=>{
                 document.querySelector(`[data-id="${x}"]`).style.backgroundColor = 'blue';
             })
@@ -201,6 +259,62 @@ cell.addEventListener('mouseleave', handleLeave);
             })
         }
     } 
+    if(btnState === 'Vertical'){
+     if (current[current.length - 1] === 'Carrier') {
+        if ([curCell2, curCell2-10, curCell2-20, curCell2-30, curCell2-40].some(n => n < 1)) return;
+            curCell.push(String(curCell2))
+            curCell.push(String(curCell2-10))
+            curCell.push(String(curCell2-20))
+            curCell.push(String(curCell2-30))
+            curCell.push(String(curCell2-40))
+            console.log(Number(curCell2))
+            curCell.forEach((x)=>{
+                document.querySelector(`[data-id="${x}"]`).style.backgroundColor = 'blue';
+            })
+        }   
+    if (current[current.length - 1] === 'Battleship'){
+            const curCell2 = Number(e.currentTarget.dataset.id);
+        if ([curCell2, curCell2-10, curCell2-20, curCell2-30].some(n => n < 1)) return; 
+        curCell.push(String(curCell2))
+            curCell.push(String(curCell2-10))
+            curCell.push(String(curCell2-20))
+            curCell.push(String(curCell2-30))
+            curCell.forEach((x)=>{
+                document.querySelector(`[data-id="${x}"]`).style.backgroundColor = 'blue';
+            })
+        }
+        if (current[current.length - 1] === 'Destroyer'){
+            const curCell2 = Number(e.currentTarget.dataset.id);
+        if ([curCell2, curCell2-10, curCell2-20].some(n => n < 1)) return;            
+            curCell.push(String(curCell2))
+            curCell.push(String(curCell2-10))
+            curCell.push(String(curCell2-20))
+            curCell.forEach((x)=>{
+                document.querySelector(`[data-id="${x}"]`).style.backgroundColor = 'blue';
+            })
+        }
+        if (current[current.length - 1] === 'Submarine'){
+            const curCell2 = Number(e.currentTarget.dataset.id);
+        if ([curCell2, curCell2-10, curCell2-20].some(n => n < 1)) return;            
+            curCell.push(String(curCell2))
+            curCell.push(String(curCell2-10))
+            curCell.push(String(curCell2-20))
+            curCell.forEach((x)=>{
+                document.querySelector(`[data-id="${x}"]`).style.backgroundColor = 'blue';
+            })
+        }
+        if (current[current.length - 1] === 'Patrol Boat'){
+            const curCell2 = Number(e.currentTarget.dataset.id);
+        if ([curCell2, curCell2-10].some(n => n < 1)) return;            
+            curCell.push(String(curCell2))
+            curCell.push(String(curCell2-10))
+            curCell.forEach((x)=>{
+                document.querySelector(`[data-id="${x}"]`).style.backgroundColor = 'blue';
+            })
+        }
+    } 
+    }
+
     function handleLeave(e){
         curCell.forEach((x)=>{
             if (!withinBounds(x)) return;
@@ -216,33 +330,109 @@ cell.addEventListener('mouseleave', handleLeave);
         if (current.length === 0) {
     your.removeEventListener('mouseleave', handleLeave);
     }
-    board.append(boardTitleContainer, enemy, your);
+    yourContainer.appendChild(yourContainerTitle);
+    enemyContainer.append(enemyContainerTitle, startBtn);
+    enemyContainer.appendChild(enemy);
+    yourContainer.append(your,buttons);
+    board.append(enemyContainer, yourContainer);
     home.appendChild(board);
-    body.append(home, title)
+    body.append(home, link)
 
 function createEnemy() {
     for (let i = 100; i < 200; i++) {
         const cellE = document.createElement('div');
         cellE.classList.add('cellE');
         cellE.dataset.id = i + 1;
+        cellE.style.border = '0.5px solid rgba(0, 0, 0, 0.07)';
+
         
         const enemy = document.getElementById('enemy');
+        enemy.style.border = '1px solid grey';
         enemy.appendChild(cellE);
-    
     }
 }
 
-let startGame = true
-const btn1 = document.getElementById('btn');
-btn1.addEventListener('click', () => {
-    if (btn.textContent === 'Start Game'){
-        startGame = false;
-        btn.textContent = 'End Game';
-    } else if (btn.textContent === 'End Game'){
-        startGame = true;
-        btn.textContent = 'Start Game';
+// vertical / horizontal button - save state
+const yourRotateBtn = document.getElementById('yourRotate');
+yourRotateBtn.addEventListener('click', () => {
+    if (yourRotateBtn.textContent === 'Vertical'){
+        yourRotateBtn.textContent = 'Horizontal';
+        btnState = 'Vertical';
+    } else {
+        yourRotateBtn.textContent = 'Vertical';
+        btnState = 'Horizontal';
     }
+
 })
+
+const reset = document.getElementById('yourResetBoard');
+reset.addEventListener('click', ()=>{
+    const placedCells = document.querySelectorAll('.placed');
+    placedCells.forEach((cell)=> {
+        cell.style.backgroundColor = '';
+        cell.classList.remove('placed');
+    })
+    current = ['Patrol Boat', 'Submarine', 'Destroyer', 'Battleship', 'Carrier'];
+    arr = [2, 3, 3, 4, 5]
+    Ship.reset()
+    gameStarted = false;
+    const cellE4 = document.querySelectorAll('.cellE');
+    cellE4.forEach(cell => {
+        cell.style.border = '0.5px solid rgba(0, 0, 0, 0.07)';
+        const enemy = document.getElementById('enemy');
+        enemy.style.border = '1px solid grey';
+    })
+    const startBTN = document.getElementById('startBtn');
+    startBTN.style.display = '';
+        
+
+
+})
+
+const start = document.getElementById('startBtn');
+start.addEventListener('click',()=>{
+    if (current.length === 0 && gameStarted === false){
+        console.log('game started');
+        gameStarted = true
+        const cellsE3 = document.querySelectorAll('.cellE');
+        const enemyCell = document.getElementById('enemy');
+        enemyCell.style.border = '2px solid black'
+        cellsE3.forEach((item)=> item.style.border = '0.5px solid rgba(0, 0, 0, 0.226)')
+        const startBTN = document.getElementById('startBtn');
+        startBTN.style.display = 'none';
+        
+        const enemyShips = new Ship()
+        let arr = [2,3,3,4,5];
+
+        const cells = document.querySelectorAll('.cellE');
+        function randomInt(min, max) {
+            return Math.floor(Math.random() * (max - min + 1)) + min;
+        }
+        let randomState;
+        let enemyCurrent = ['Patrol Boat', 'Submarine', 'Destroyer', 'Battleship', 'Carrier'];
+        while (enemyCurrent.length !== 0){
+            const n = randomInt(101, 200);
+            const n2 = randomInt(1,2);
+            if (n2 === 1){
+                randomState = 'Horizontal';
+            } else {
+                randomState = 'Vertical';
+            }
+            
+            let el = document.querySelector(`[data-id="${n}"]`);
+            console.log(el);
+            el.style.backgroundColor = 'blue';
+            if (true){
+             enemyCurrent.pop()
+            }
+            // while (enemyCurrent.length !== 0){
+            //     enemyCurrent.pop()
+            // }
+        }
+            
+        }
+    })
+
 createEnemy()
 }
 

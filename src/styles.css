@@ -102,6 +102,8 @@ input:-webkit-autofill:active {
     display: flex;
     align-items: center;
     justify-content: center;
+    flex-shrink: 0;
+
 }
 #board {
   display: grid;
@@ -114,26 +116,27 @@ input:-webkit-autofill:active {
     display: grid;
     grid-template-columns: repeat(10, 1fr);
     grid-template-rows: repeat(10, 1fr);
+    border: 2px solid black;
 }
 
 #your {
   aspect-ratio: 1 / 1;
+  min-width: 300px;
   width: min(90vw, 400px);
 }
 
 #enemy {
   aspect-ratio: 1 / 1;
+  min-width: 300px;
   width: min(90vw, 400px);
+
 }
 
-.cellE {
-    border: 0.5px solid grey;
-}
 
 .cell {
     width: 100%;
     height: 100%;
-    border: 0.5px solid black;
+    border: 0.5px solid rgba(0, 0, 0, 0.226);
 }
 
 #boardTitleContainer {
@@ -156,6 +159,71 @@ input:-webkit-autofill:active {
     margin-top: 16px;
 }
 
+#title {
+    position: fixed;
+    top: 0;
+    right: 0;
+    padding: 32px;
+}
+
+#yourContainerTitle, #enemyContainerTitle {
+    padding: 32px;
+    text-align: center;
+}
+
+a {
+    list-style: none;
+    color: blue;
+}
+
+#yourResetBoard {
+    position: relative;
+    bottom: 0;
+    padding: 16px 32px;
+}
+
+#yourContainer {
+    align-items: center;
+}
+
+#buttons {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    margin-top: 32px;
+}
+
+#yourResetBoard {
+    margin-right: 32px;
+}
+
+#yourRotate {
+    padding: 16px 32px;
+}
+
+#startBtn {
+    position: absolute;
+    align-items: center;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    padding: 16px 32px;
+    background-color: blue;
+    border-radius: 8px;
+    color: white;
+    cursor: pointer;
+    border: 1px solid black;
+    font-size: 16px;
+}
+
+#enemyContainer {
+      position: relative;
+}
+
+
+#enemy {
+    border: 2px solid black;
+}
 
 @media (width <= 768px) {
     #home {
