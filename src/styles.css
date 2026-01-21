@@ -220,6 +220,9 @@ a {
       position: relative;
 }
 
+.cellE, .cell {
+    text-align: center;
+}
 
 #enemy {
     border: 2px solid black;

@@ -21,3 +21,6 @@ when click start, it should record the positions of the ships to an object/updat
 when clicked start it should start game -> remove/hide start button, change enemy grid to the default colors
 (js - should place the ships randomly on valid tiles)
 player takes turn - highlight square with dot if empty, highlight with x if ship is there
+when sunk should display bigger border/indication
+
+random id 

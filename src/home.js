@@ -16,18 +16,36 @@ class Ship {
     Ship.ships = structuredClone(SHIP_TEMPLATES);
   }
 
-  hit(shipName, cellId) {
+  hit() {
     
   }
   isSunk() {}
 }
 
+class ShipEnemy {
+  static ships = structuredClone(SHIP_TEMPLATES);
+
+  static reset() {
+    Ship.ships = structuredClone(SHIP_TEMPLATES);
+  }
+
+  hit() {
+    
+  }
+  isSunk() {}
+}
+
+function hasShipAtCell(shipsObj, cellId){
+    return Object.values(shipsObj).some(
+        ship => ship.position?.includes(cellId)
+    );
+}
 
 class gameBoard{
     // track the state of the player board
 
     receiveAttack(){
-
+        
     }
     missedAttack(){
 
@@ -43,10 +61,12 @@ function Player(){
 }
 
 
+
 let current = ['Patrol Boat', 'Submarine', 'Destroyer', 'Battleship', 'Carrier'];
 const withinBounds = (n) => n >= 1 && n <= 100;
 let btnState = 'Horizontal'
 let gameStarted = false;
+let playerTurn = false;
 
 function createBoard() {
     const input = document.getElementById('name').value;
@@ -107,7 +127,7 @@ for (let i = 0; i < 100; i++) {
   const cell = document.createElement('div');
   cell.classList.add('cell');
   cell.dataset.id = i + 1;
-    
+
   cell.addEventListener('mouseenter', handleEnter);
 cell.addEventListener('mouseleave', handleLeave);
   
@@ -344,7 +364,7 @@ function createEnemy() {
         cellE.classList.add('cellE');
         cellE.dataset.id = i + 1;
         cellE.style.border = '0.5px solid rgba(0, 0, 0, 0.07)';
-
+        cellE.addEventListener('click',handlePlayerClick);
         
         const enemy = document.getElementById('enemy');
         enemy.style.border = '1px solid grey';
@@ -376,18 +396,31 @@ reset.addEventListener('click', ()=>{
     arr = [2, 3, 3, 4, 5]
     Ship.reset()
     gameStarted = false;
-    const cellE4 = document.querySelectorAll('.cellE');
-    cellE4.forEach(cell => {
+    const selectCells = document.querySelectorAll('.cellE');
+    selectCells.forEach((cell)=> {
+        cell.textContent = '';
+        cell.style.color = 'black'
+        cell.style.backgroundColor = '';
+    })
+    selectCells.forEach(cell => {
         cell.style.border = '0.5px solid rgba(0, 0, 0, 0.07)';
         const enemy = document.getElementById('enemy');
         enemy.style.border = '1px solid grey';
     })
     const startBTN = document.getElementById('startBtn');
     startBTN.style.display = '';
-        
+    const selectYour = document.querySelectorAll('.cell');
+    selectYour.forEach((cell)=>{
+        cell.textContent = '';
+        cell.style.color = '';
+        cell.style.border = '';
+        cell.style.backgroundColor = '';
+    })
+
 
 
 })
+
 
 const start = document.getElementById('startBtn');
 start.addEventListener('click',()=>{
@@ -401,37 +434,198 @@ start.addEventListener('click',()=>{
         const startBTN = document.getElementById('startBtn');
         startBTN.style.display = 'none';
         
-        const enemyShips = new Ship()
+
         let arr = [2,3,3,4,5];
 
         const cells = document.querySelectorAll('.cellE');
-        function randomInt(min, max) {
-            return Math.floor(Math.random() * (max - min + 1)) + min;
+        let arr2 = [2, 3, 3, 4, 5]; // ship lengths
+        let results = [];          // array of ship position arrays
+
+        function randomInt101to200() {
+        return Math.floor(Math.random() * 100) + 101;
         }
-        let randomState;
-        let enemyCurrent = ['Patrol Boat', 'Submarine', 'Destroyer', 'Battleship', 'Carrier'];
-        while (enemyCurrent.length !== 0){
-            const n = randomInt(101, 200);
-            const n2 = randomInt(1,2);
-            if (n2 === 1){
-                randomState = 'Horizontal';
+
+        function randomOneOrTwo() {
+        return Math.floor(Math.random() * 2) + 1; // 1 or 2
+        }
+
+        function isOutOfBounds(posArr) {
+        return posArr.some(n => n <= 100 || n >= 201);
+        }
+
+        // Horizontal wrap check for a 10-wide grid (101–200).
+        // If you move left from 110 -> 109 that's fine, but you must not cross rows.
+        // A simple rule for "moving left": all cells must stay on the same row.
+        function crossesRow(posArr) {
+        const row = Math.floor((posArr[0] - 101) / 10);
+        return posArr.some(n => Math.floor((n - 101) / 10) !== row);
+        }
+
+        function buildShipPositions(start, length, orientation) {
+        const pos = [start]; // include starting cell
+        for (let step = 1; step < length; step++) {
+            if (orientation === 1) {
+            // horizontal (to the left)
+            pos.push(start - step);
             } else {
-                randomState = 'Vertical';
+            // vertical (upwards)
+            pos.push(start - step * 10);
             }
+        }
+        return pos;
+        }
+
+        function isValidPlacement(posArr, orientation) {
+        if (isOutOfBounds(posArr)) return false;
+        if (orientation === 1 && crossesRow(posArr)) return false;
+        return true;
+        }
+
+        // Generate placements for each ship length
+        for (let idx = 0; idx < arr2.length; idx++) {
+        const length = arr2[idx];
+        let placed = false;
+
+        while (!placed) {
+            const start = randomInt101to200();
+            const orientation = randomOneOrTwo(); // 1 = horizontal, 2 = vertical
+            const posArr = buildShipPositions(start, length, orientation);
+
+            if (isValidPlacement(posArr, orientation)) {
+            results.push(posArr);
             
-            let el = document.querySelector(`[data-id="${n}"]`);
-            console.log(el);
-            el.style.backgroundColor = 'blue';
-            if (true){
-             enemyCurrent.pop()
+            placed = true;
             }
-            // while (enemyCurrent.length !== 0){
-            //     enemyCurrent.pop()
-            // }
         }
-            
         }
+        let arrShips = ['Patrol Boat', 'Submarine', 'Destroyer', 'Battleship', 'Carrier']
+        
+        console.log(results)
+        ShipEnemy.ships.Carrier.position = results[results.length-1];
+        ShipEnemy.ships.Battleship.position = results[results.length-2];
+        ShipEnemy.ships.Destroyer.position = results[results.length-3];
+        ShipEnemy.ships.Submarine.position = results[results.length-4];
+        ShipEnemy.ships.PatrolBoat.position = results[results.length-5];
+        }
+        console.log(ShipEnemy.ships);
+        playerTurn = true;
+
     })
+const handlePlayerClick = function (e) {
+    if (gameStarted && playerTurn){
+            const cellId2 = Number(e.currentTarget.dataset.id);
+            const cell = document.querySelector(`[data-id="${cellId2}"]`)
+        if (hasShipAtCell(ShipEnemy.ships, cellId2) && playerTurn){
+            cell.textContent = 'X';
+            cell.style.color = 'rgba(213, 7, 7, 0.8)';
+            cell.style.border = '1px solid rgba(213, 7, 7, 0.8)';
+            cell.style.backgroundColor = 'rgba(213, 7, 7, 0.19)';
+        } else if (playerTurn) {
+            cell.textContent = 'O';
+            playerTurn = false;
+            console.log('enemy turn');
+            handleEnemyTurn();
+        }       
+    }
+
+}
+
+let winCounter = 0;
+function getNeighbours(id) {
+  const neighbours = [];
+
+  const row = Math.ceil(id / 10);
+
+  // left
+  if (id - 1 >= 1 && Math.ceil((id - 1) / 10) === row) {
+    neighbours.push(id - 1);
+  }
+
+  // right
+  if (id + 1 <= 100 && Math.ceil((id + 1) / 10) === row) {
+    neighbours.push(id + 1);
+  }
+
+  // up
+  if (id - 10 >= 1) {
+    neighbours.push(id - 10);
+  }
+
+  // down
+  if (id + 10 <= 100) {
+    neighbours.push(id + 10);
+  }
+
+  return neighbours;
+}
+
+let lastCellId = null;
+
+const handleEnemyTurn = function () {
+  // if hunting (we have a previous hit)
+  if (winCounter > 0 && lastCellId !== null) {
+    // only choose neighbours that haven't been shot yet
+    const neighbours = getNeighbours(lastCellId).filter((nid) => {
+      const c = document.querySelector(`[data-id="${nid}"]`);
+      return c && c.textContent !== "X" && c.textContent !== "O";
+    });
+
+    if (neighbours.length === 0) {
+      // no valid neighbours left → stop hunting
+      winCounter = 0;
+      lastCellId = null;
+      return handleEnemyTurn();
+    }
+
+    const targetId = neighbours[Math.floor(Math.random() * neighbours.length)];
+    const cell2 = document.querySelector(`[data-id="${targetId}"]`);
+
+    if (hasShipAtCell(Ship.ships, targetId)) {
+      cell2.textContent = "X";
+      cell2.style.color = "rgba(213, 7, 7, 0.8)";
+      cell2.style.border = "1px solid rgba(213, 7, 7, 0.8)";
+      cell2.style.backgroundColor = "rgba(213, 7, 7, 0.19)";
+
+      // ✅ hit → update last hit and go again
+      lastCellId = targetId;
+      winCounter = 1;
+      return handleEnemyTurn();
+    } else {
+      // ✅ miss → mark THIS cell (cell2), reset hunt, give turn back
+      cell2.textContent = "O";
+      playerTurn = true;
+      winCounter = 0;
+      lastCellId = null;
+      return;
+    }
+  }
+
+  // otherwise random shot
+  let id, cell;
+
+  do {
+    id = Math.floor(Math.random() * 100) + 1;
+    cell = document.querySelector(`[data-id="${id}"]`);
+  } while (!cell || cell.textContent === "X" || cell.textContent === "O");
+
+  if (hasShipAtCell(Ship.ships, id)) {
+    cell.textContent = "X";
+    cell.style.color = "rgba(213, 7, 7, 0.8)";
+    cell.style.border = "1px solid rgba(213, 7, 7, 0.8)";
+    cell.style.backgroundColor = "rgba(213, 7, 7, 0.19)";
+
+    winCounter = 1;
+    lastCellId = id;
+    return handleEnemyTurn(); // ✅ hit → go again
+  } else {
+    cell.textContent = "O";
+    playerTurn = true;
+    winCounter = 0;
+    lastCellId = null;
+    return;
+  }
+};
+
 
 createEnemy()
 }
