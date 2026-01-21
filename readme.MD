@@ -24,3 +24,8 @@ player takes turn - highlight square with dot if empty, highlight with x if ship
 when sunk should display bigger border/indication
 
 random id 
+
+store id in gameboard obj, access gameboard obj to pick from remaining positions;
+
+
+Future version: include info on winner, change background of sunken ship, indicate on ships that have sunk on ui.

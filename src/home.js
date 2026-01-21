@@ -41,6 +41,8 @@ function hasShipAtCell(shipsObj, cellId){
     );
 }
 
+let enemyArr = []
+
 class gameBoard{
     // track the state of the player board
 
@@ -562,6 +564,7 @@ function getNeighbours(id) {
 let lastCellId = null;
 
 const handleEnemyTurn = function () {
+
   // if hunting (we have a previous hit)
   if (winCounter > 0 && lastCellId !== null) {
     // only choose neighbours that haven't been shot yet
@@ -585,10 +588,13 @@ const handleEnemyTurn = function () {
       cell2.style.color = "rgba(213, 7, 7, 0.8)";
       cell2.style.border = "1px solid rgba(213, 7, 7, 0.8)";
       cell2.style.backgroundColor = "rgba(213, 7, 7, 0.19)";
-
+            enemyArr.push(id)
       // ✅ hit → update last hit and go again
       lastCellId = targetId;
+        
+
       winCounter = 1;
+
       return handleEnemyTurn();
     } else {
       // ✅ miss → mark THIS cell (cell2), reset hunt, give turn back
@@ -596,6 +602,7 @@ const handleEnemyTurn = function () {
       playerTurn = true;
       winCounter = 0;
       lastCellId = null;
+    enemyArr.push(id)
       return;
     }
   }
@@ -607,17 +614,18 @@ const handleEnemyTurn = function () {
     id = Math.floor(Math.random() * 100) + 1;
     cell = document.querySelector(`[data-id="${id}"]`);
   } while (!cell || cell.textContent === "X" || cell.textContent === "O");
-
   if (hasShipAtCell(Ship.ships, id)) {
+    enemyArr.push(id);
     cell.textContent = "X";
     cell.style.color = "rgba(213, 7, 7, 0.8)";
     cell.style.border = "1px solid rgba(213, 7, 7, 0.8)";
     cell.style.backgroundColor = "rgba(213, 7, 7, 0.19)";
-
+    
     winCounter = 1;
     lastCellId = id;
     return handleEnemyTurn(); // ✅ hit → go again
   } else {
+    enemyArr.push(id);
     cell.textContent = "O";
     playerTurn = true;
     winCounter = 0;
